@@ -1,6 +1,8 @@
 #will create poll class
-from State import *
-from Pollster import *
+import State
+import Pollster
+import numpy as np
+import pandas as pd
 
 class Poll:
 
@@ -11,12 +13,12 @@ class Poll:
 	for pollster in Pollster.pollsters:
 		poll_by_state[pollster.name] = []
 
-	def __init__(self, state, date, size, pollster, d, r):
+	def __init__(self, state, date, pollster, d, r, error):
 		self.state = state
 		self.date = date
-		self.size = size
 		self.pollster = pollster
 		self.d = d
 		self.r = r
-		poll_by_state[self.state.name].append(self)
-		poll_by_pollster[self.pollster.name].append(self)
+		self.error
+		Poll.poll_by_state[self.state.name].append(self)
+		Poll.poll_by_pollster[self.pollster.name].append(self)
