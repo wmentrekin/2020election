@@ -1,13 +1,13 @@
 #The actual predictive model exists in this file
 import Scraper
-import State
+import Objects
 import numpy as np
 import pandas as pd
 
 ##Data for State objects
 state_data = Scraper.state_scrape("state_data.csv")
 for index, row in state_data.iterrows():
-	State.State(row["state"],
+	Objects.State(row["state"],
     	  row["abbrev"],
     	  row["ev"],
     	  row["population"],
@@ -16,5 +16,5 @@ for index, row in state_data.iterrows():
     	  row["demographics"],
     	  row["registration"],
     	  row["turnout"])
-for state in State.State.states:
+for state in Objects.State.states:
 	print(state)
