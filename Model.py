@@ -66,7 +66,7 @@ class Poll:
 		Poll.poll_by_state[self.state.name].append(self)
 		Poll.poll_by_pollster[self.pollster.name].append(self)
 
-##Data for State objects
+#Data for State objects
 state_data = pd.read_csv("state_data.csv")
 for index, row in state_data.iterrows():
 	State(row["state"],
@@ -81,3 +81,6 @@ for index, row in state_data.iterrows():
 pollster_data = pd.read_csv("pollster_data.csv")
 for index, row in pollster_data.iterrows():
 	Pollster(row['POLLSTER'], row['538 GRADE'], row['MEAN-REVERTED BIAS'])
+
+#Data for Poll Objects
+#Scrape, then Instantiate
