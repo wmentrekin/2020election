@@ -38,7 +38,7 @@ class Pollster:
 		Pollster.pollsters.append(self)
 	
 	def __str__(self):
-		return "{} has a grade of {} from 538 and usually is off by {}%."
+		return "{} has a grade of {} from 538 and a mean-reverted bias of {}%.".format(self.name, self.grade, self.bias)
 	
 	def __repr__(self):
 		return "{name:" + self.name + ", grade:" + self.grade + ", bias" + self.bias + "}"

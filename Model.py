@@ -17,4 +17,7 @@ for index, row in state_data.iterrows():
 
 pollster_data = Scraper.csv_scrape("pollster_data.csv")
 for index, row in pollster_data.iterrows():
-	Objects.Pollster()
+	Objects.Pollster(row['POLLSTER'], row['538 GRADE'], row['MEAN-REVERTED BIAS'])
+
+for pollster in Objects.Pollster.pollsters:
+	print(pollster)
