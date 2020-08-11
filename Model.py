@@ -69,7 +69,7 @@ class Poll:
 ##Data for State objects
 state_data = pd.read_csv("state_data.csv")
 for index, row in state_data.iterrows():
-	Objects.State(row["state"],
+	State(row["state"],
     	  row["abbrev"],
     	  row["ev"],
     	  row["population"],
@@ -80,4 +80,4 @@ for index, row in state_data.iterrows():
 #Data for Pollster Objects
 pollster_data = pd.read_csv("pollster_data.csv")
 for index, row in pollster_data.iterrows():
-	Objects.Pollster(row['POLLSTER'], row['538 GRADE'], row['MEAN-REVERTED BIAS'])
+	Pollster(row['POLLSTER'], row['538 GRADE'], row['MEAN-REVERTED BIAS'])
