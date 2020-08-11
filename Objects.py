@@ -36,6 +36,12 @@ class Pollster:
 		self.grade = grade
 		self.bias = bias
 		Pollster.pollsters.append(self)
+	
+	def __str__(self):
+		return "{} has a grade of {} from 538 and usually is off by {}%."
+	
+	def __repr__(self):
+		return "{name:" + self.name + ", grade:" + self.grade + ", bias" + self.bias + "}"
 
 	def set_correction(self):
 		self.correction2016 = 0
