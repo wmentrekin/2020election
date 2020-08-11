@@ -1,11 +1,9 @@
 #The actual predictive model exists in this file
-import Scraper
 import Objects
-import numpy as np
 import pandas as pd
 
 ##Data for State objects
-state_data = Scraper.csv_scrape("state_data.csv")
+state_data = pd.read_csv("state_data.csv")
 for index, row in state_data.iterrows():
 	Objects.State(row["state"],
     	  row["abbrev"],
@@ -15,9 +13,6 @@ for index, row in state_data.iterrows():
     	  [row["pvi"],row["pvi_party"],row["pvi_margin"]],
     	  row["turnout"])
 
-pollster_data = Scraper.csv_scrape("pollster_data.csv")
+pollster_data = pd.read_csv("pollster_data.csv")
 for index, row in pollster_data.iterrows():
 	Objects.Pollster(row['POLLSTER'], row['538 GRADE'], row['MEAN-REVERTED BIAS'])
-
-for pollster in Objects.Pollster.pollsters:
-	print(pollster)
