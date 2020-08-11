@@ -13,8 +13,6 @@ for index, row in state_data.iterrows():
     	  row["population"],
     	  [row["d16"],row["r16"],row["total16"]],
     	  [row["pvi"],row["pvi_party"],row["pvi_margin"]],
-    	  row["demographics"],
-    	  row["registration"],
     	  row["turnout"])
 for state in Objects.State.states:
 	print(state)
