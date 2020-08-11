@@ -3,6 +3,6 @@
 import numpy as np
 import pandas as pd
 
-def state_scrape(file):
+def csv_scrape(file):
 	data = pd.read_csv(file)
 	return data
