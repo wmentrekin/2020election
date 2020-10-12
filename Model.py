@@ -1,6 +1,18 @@
 #The predictive model exists in this file
 import pandas as pd
 
+#Scrapes state data
+def state_scrape():
+	print("Scraping state data")
+
+#Scrapes the pollster data
+def pollster_scrape():
+	print("Scraping pollster data")
+
+#Scrapes the poll data
+def poll_scrape():
+	print("Scraping poll data")
+
 #Creates State class and does some calculations
 class State:
 
@@ -66,21 +78,40 @@ class Poll:
 		Poll.poll_by_state[self.state.name].append(self)
 		Poll.poll_by_pollster[self.pollster.name].append(self)
 
-#Data for State objects
-state_data = pd.read_csv("state_data.csv")
-for index, row in state_data.iterrows():
-	State(row["state"],
-    	  row["abbrev"],
-    	  row["ev"],
-    	  row["population"],
-    	  [row["d16"],row["r16"],row["total16"]],
-    	  [row["pvi"],row["pvi_party"],row["pvi_margin"]],
-    	  row["turnout"])
+#Creates State Objects
+def create_states():
+	state_data = pd.read_csv("state_data.csv")
+	for row in state_data.iterrows():
+		State(row["state"],
+    	  	row["abbrev"],
+    	  	row["ev"],
+    	  	row["population"],
+    	  	[row["d16"],row["r16"],row["total16"]],
+    	  	[row["pvi"],row["pvi_party"],row["pvi_margin"]],
+    	  	row["turnout"])
 
-#Data for Pollster Objects
-pollster_data = pd.read_csv("pollster_data.csv")
-for index, row in pollster_data.iterrows():
-	Pollster(row['POLLSTER'], row['538 GRADE'], row['MEAN-REVERTED BIAS'])
+#Creates Pollster Objects
+def create_pollsters():
+	pollster_data = pd.read_csv("pollster_data.csv")
+	for row in pollster_data.iterrows():
+		Pollster(row['POLLSTER'], row['538 GRADE'], row['MEAN-REVERTED BIAS'])
 
-#Data for Poll Objects
-#Scrape, then Instantiate
+#Creates Poll Objects
+
+#Normalizes Polls with Pollster Ratings
+
+#Aggregates Normalized Polls by State & Date into Single Rating
+
+#Creates Distribution for both candidates in all states
+
+#Runs random numbers on distribution
+
+#Aggregates model
+
+#Run Model
+def model():
+	state_scrape()
+	pollster_scrape()
+	poll_scrape()
+	create_states()
+	create_pollsters()
