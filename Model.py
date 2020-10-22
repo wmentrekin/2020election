@@ -1,9 +1,20 @@
 #The predictive model exists in this file
+import numpy as np
 import pandas as pd
+import requests
+import re
+from bs4 import BeautifulSoup
 
 #Scrapes state data
 def state_scrape():
-	print("Scraping state data")
+	state_list = []
+	populations = pd.read_csv('data/populations.csv')
+	for population in populations.iterrows():
+		state_dict = {}
+		state_dict['name'] = population[1]['NAME']
+		state_dict['population'] = population[1]['P001001'].split('(')[0]
+		state_list.append(state_dict)
+state_scrape()
 
 #Scrapes the pollster data
 def pollster_scrape():
