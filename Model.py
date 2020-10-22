@@ -4,36 +4,39 @@ import pandas as pd
 import requests
 import re
 from bs4 import BeautifulSoup
+import xlrd
 
 #Scrapes state data
 def state_scrape():
-	state_list = []
+	states = {}
 
 	#Name & Population
 	populations = pd.read_csv('data/populations.csv')
 	for population in populations.iterrows():
 		state_dict = {}
-		state_dict['name'] = population[1]['NAME']
 		state_dict['population'] = population[1]['P001001'].split('(')[0]
-		state_list.append(state_dict)
-state_scrape()
+		states[str(population[1]['NAME'])] = state_dict
+
+	#2016 Election Results
+	loc = ("data/federalelections2016.xlsx")
+	wb = xlrd.open_workbook(loc)
+	sheet = wb.sheet_by_index(8)
+	for i in range(sheet.nrows):
+		if sheet.cell_value(i, 9) in ["DEM", "REP"]:
+			return
 
 #Scrapes the pollster data
-def pollster_scrape():
-	print("Scraping pollster data")
 
 #Scrapes the poll data
-def poll_scrape():
-	print("Scraping poll data")
 
 #Creates State class and does some calculations
 class State:
 
 	states = []
 
-	def __init__(self, name, population, election16, pvi):
+	def __init__(self, name, ev, population, election16, pvi):
 		self.name = str(name)
-		self.ev = 1
+		self.ev = ev
 		self.population = int(population)
 		self.election16 = {"D":election16[0], "R":election16[1], "Total":election16[2]}
 		self.pvi = {"party":pvi[1], "margin":pvi[2]}
@@ -41,17 +44,13 @@ class State:
 		State.states.append(self)
 
 	def __str__(self):
-		return "{} ({}) has {} electoral votes, a population of {}, and a Cook PVI of {}+{}.".format(self.name, self.ev, self.population, self.pvi["party"], self.pvi["margin"])
+		return "{} has {} electoral votes, a population of {}, and a Cook PVI of {}+{}.".format(self.name, self.ev, self.population, self.pvi["party"], self.pvi["margin"])
 
 	def __repr__(self):
 		return "{name:" + self.name + ", ev:" + str(self.ev) + ", population:" + str(self.population) + ", election16:" + str(self.election16) + ", pvi:" + str(self.pvi)  + ", polls:" + self.polls + "}"
 
 	def set_polls(self):
 		self.polls = Poll.poll_by_state[self.name]
-
-	def set_ev():
-		for state in State.states:
-
 
 #creates pollster class and measure the accuracy of each pollster
 class Pollster:
@@ -94,12 +93,8 @@ class Poll:
 		Poll.poll_by_pollster[self.pollster.name].append(self)
 
 #Creates State Objects
-def create_states():
-	return
 
 #Creates Pollster Objects
-def create_pollsters():
-	return
 
 #Creates Poll Objects
 
@@ -116,7 +111,6 @@ def create_pollsters():
 #Run Model
 def model():
 	state_scrape()
-	pollster_scrape()
-	poll_scrape()
-	create_states()
-	create_pollsters()
+
+if __name__ == "__main__":
+	model()
