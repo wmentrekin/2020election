@@ -8,6 +8,8 @@ from bs4 import BeautifulSoup
 #Scrapes state data
 def state_scrape():
 	state_list = []
+
+	#Name & Population
 	populations = pd.read_csv('data/populations.csv')
 	for population in populations.iterrows():
 		state_dict = {}
@@ -29,25 +31,27 @@ class State:
 
 	states = []
 
-	def __init__(self, name, abbreviation, ev, population, election16, pvi, turnout):
+	def __init__(self, name, population, election16, pvi):
 		self.name = str(name)
-		self.abbreviation = str(abbreviation)
-		self.ev = int(ev)
+		self.ev = 1
 		self.population = int(population)
 		self.election16 = {"D":election16[0], "R":election16[1], "Total":election16[2]}
 		self.pvi = {"party":pvi[1], "margin":pvi[2]}
-		self.turnout = turnout
 		self.polls = []
 		State.states.append(self)
 
 	def __str__(self):
-		return "{} ({}) has {} electoral votes, a population of {}, and a Cook PVI of {}+{}.".format(self.name, self.abbreviation, self.ev, self.population, self.pvi["party"], self.pvi["margin"])
+		return "{} ({}) has {} electoral votes, a population of {}, and a Cook PVI of {}+{}.".format(self.name, self.ev, self.population, self.pvi["party"], self.pvi["margin"])
 
 	def __repr__(self):
-		return "{name:" + self.name + ", abbreviation:" + self.abbreviation + ", ev:" + str(self.ev) + ", population:" + str(self.population) + ", election:" + str(self.election16) + ", pvi:" + str(self.pvi) + ", turnout:" + str(self.turnout) + ", polls:" + self.polls + "}"
+		return "{name:" + self.name + ", ev:" + str(self.ev) + ", population:" + str(self.population) + ", election16:" + str(self.election16) + ", pvi:" + str(self.pvi)  + ", polls:" + self.polls + "}"
 
 	def set_polls(self):
 		self.polls = Poll.poll_by_state[self.name]
+
+	def set_ev():
+		for state in State.states:
+
 
 #creates pollster class and measure the accuracy of each pollster
 class Pollster:
@@ -91,21 +95,11 @@ class Poll:
 
 #Creates State Objects
 def create_states():
-	state_data = pd.read_csv("state_data.csv")
-	for row in state_data.iterrows():
-		State(row["state"],
-    	  	row["abbrev"],
-    	  	row["ev"],
-    	  	row["population"],
-    	  	[row["d16"],row["r16"],row["total16"]],
-    	  	[row["pvi"],row["pvi_party"],row["pvi_margin"]],
-    	  	row["turnout"])
+	return
 
 #Creates Pollster Objects
 def create_pollsters():
-	pollster_data = pd.read_csv("pollster_data.csv")
-	for row in pollster_data.iterrows():
-		Pollster(row['POLLSTER'], row['538 GRADE'], row['MEAN-REVERTED BIAS'])
+	return
 
 #Creates Poll Objects
 
