@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Model.py: Performs a statistical predictive model for the 2020 United States presidential election."""
+"""Model.py: Performs a statistical predictive model for the 2020 United States presidential election"""
 
 import os
 import sys
@@ -77,11 +77,7 @@ def pollster_scrape():
 
 #Scrapes the poll data
 def poll_scraper():
-	url = 'https://www.270towin.com/2020-polls-biden-trump/'
-	page = requests.get(url)
-	soup = BeautifulSoup(page.content, 'html.parser')
-	states = soup.find_all(class_='chartjs-hidden-iframe')
-
+	print('Scraping Polls')
 
 #Creates State class and does some calculations
 class State:
@@ -102,7 +98,7 @@ class State:
 	def set_polls(self):
 		self.polls = Poll.poll_by_state[self.name]
 
-#creates pollster class and measure the accuracy of each pollster
+#Creates pollster class and measure the accuracy of each pollster
 class Pollster:
 
 	pollsters = []
@@ -119,7 +115,7 @@ class Pollster:
 	def set_correction(self):
 		self.correction2016 = 0
 
-#create poll class and organizes them by pollster and state
+#Create poll class and organizes them by pollster and state
 class Poll:
 
 	poll_by_state = {}
@@ -171,7 +167,7 @@ def create_polls(polls):
 def model():
 	create_states(state_scrape())
 	create_pollsters(pollster_scrape())
-	poll_scraper()
+	create_polls(poll_scraper())
 
 if __name__ == "__main__":
 	model()
