@@ -77,7 +77,29 @@ def pollster_scrape():
 
 #Scrapes the poll data
 def poll_scraper():
-	print('Scraping Polls')
+	polls = []
+	base = 'https://www.270towin.com/2020-polls-biden-trump/'
+	for state in State.states:
+		name = state.name.lower().replace(' ', '-')
+		url = base + name
+		page = requests.get(url)
+		soup = BeautifulSoup(page.content, 'html.parser')
+		pollsters = soup.find_all('td', class_='poll_src')
+		dates = soup.find_all('td', class_='poll_date')
+		d = soup.find_all('td', candidate_id='D')
+		r = soup.find_all('td', candidate_id='R')
+		errors = soup.find_all('td', class_='poll_sample')
+		for i in range(len(dates)):
+			polldict = {}
+			polldict['state'] = state
+			polldict['pollster'] = pollsters[i].text.strip('\n')
+			polldict['date'] = dates[i].text
+			polldict['D'] = d[i].text.split('%')[0].strip()
+			polldict['R'] = r[i].text.split('%')[0].strip()
+			error = errors[i].text.split(' &plusmn')
+			polldict['error'] = 0 if len(error) == 1 else error[1].split('%')[0]
+			polls.append(polldict)
+	return polls
 
 #Creates State class and does some calculations
 class State:
@@ -88,7 +110,7 @@ class State:
 		self.name = str(name)
 		self.ev = int(ev)
 		self.population = int(population)
-		self.election16 = {"D":election16[0], "R":election16[1], "Total":election16[2]}
+		self.election16 = {"D": int(election16[0]), "R": int(election16[1]), "Total": int(election16[2])}
 		self.polls = []
 		State.states.append(self)
 
@@ -104,8 +126,8 @@ class Pollster:
 	pollsters = []
 
 	def __init__(self, name, grade, bias):
-		self.name = name
-		self.grade = grade
+		self.name = str(name)
+		self.grade = str(grade)
 		self.bias = bias
 		Pollster.pollsters.append(self)
 	
@@ -117,6 +139,8 @@ class Pollster:
 
 #Create poll class and organizes them by pollster and state
 class Poll:
+
+	polls = []
 
 	poll_by_state = {}
 	for state in State.states:
@@ -133,7 +157,8 @@ class Poll:
 		self.r = r
 		self.error = error
 		Poll.poll_by_state[self.state.name].append(self)
-		Poll.poll_by_pollster[self.pollster.name].append(self)
+		Poll.poll_by_pollster[self.pollster].append(self)
+		Poll.polls.append(self)
 
 	def __str__(self):
 		return "{} conducted a poll in {} on {} which had Biden at {} and Trump at {} with an error of {}".format(self.pollster, self.state, self.date, self.d, self.r, self.error)
@@ -151,7 +176,16 @@ def create_pollsters(pollsters):
 
 #Creates Poll Objects
 def create_polls(polls):
-	print('Creating Polls')
+	pollsters = [pollster.name for pollster in Pollster.pollsters]
+	for pollster in pollsters:
+		print(pollster)
+	# for poll in polls:
+	# 	print(poll)
+	# for poll in polls:
+	# 	if poll['pollster'] in pollsters:
+	# 		Poll(poll['state'], poll['date'], poll['pollster'], poll['D'], poll['R'], poll['error'])
+	# print(Poll.polls)
+
 
 #Normalizes Polls with Pollster Ratings
 
