@@ -6,17 +6,18 @@ import xlrd
 
 #Scrapes state data
 def state_scrape():
+
 	states = {}
 
 	#Name & Population
-	populations = pd.read_csv('data/populations.csv')
+	populations = pd.read_csv('data/populations.csv') #File Downloaded from Census.gov
 	for population in populations.iterrows():
 		state_dict = {}
 		state_dict['population'] = population[1]['P001001'].split('(')[0]
 		states[str(population[1]['NAME'])] = state_dict
 
 	#2016 Election Results
-	loc = ("data/federalelections2016.xlsx")
+	loc = ("data/federalelections2016.xlsx") #File Downloaded from FEC Website
 	wb = xlrd.open_workbook(loc)
 	sheet = wb.sheet_by_index(2)
 	results = []
@@ -40,22 +41,32 @@ def state_scrape():
 
 #Scrapes the pollster data
 def pollster_scrape():
+
 	url = "https://projects.fivethirtyeight.com/pollster-ratings/"
 	page = requests.get(url)
 	soup = BeautifulSoup(page.content, 'html.parser')
+
 	names = soup.find_all('td', class_='td js-pollster pollster')
 	grades = soup.find_all('div', class_='gradeText')
 	bias = soup.find_all('div', class_='biasTextBG innerDiv')
+
 	pollsters = []
+
 	for i in range(20):
+
 		pollster = {}
+
 		pollster['name'] = names[i]['data-sort']
 		pollster['grade'] = grades[i].text[1::]
 		pollster['bias'] = bias[i].text.split('+')
+
 		pollsters.append(pollster)
+
 	return pollsters
 
 #Scrapes the poll data
+def poll_scraper():
+	print("Scraping polls")
 
 #Creates State class and does some calculations
 class State:
@@ -130,8 +141,9 @@ def create_pollsters(pollsters):
 		if pollster['grade'] in ['A+', 'A', 'A-', 'B+', 'B', 'B-']:
 			Pollster(pollster['name'], pollster['grade'], pollster['bias'])
 
-
 #Creates Poll Objects
+def create_polls(polls):
+	print('Creating Polls')
 
 #Normalizes Polls with Pollster Ratings
 
@@ -146,7 +158,8 @@ def create_pollsters(pollsters):
 #Run Model
 def model():
 	#create_states(state_scrape())
-	create_pollsters(pollster_scrape())
+	#create_pollsters(pollster_scrape())
+	create_polls(poll_scraper())
 
 if __name__ == "__main__":
 	model()
