@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Model.py: Performs a statistical predictive model for the 2020 United States presidential election"""
+"""Model.py: A statistical predictive model for the 2020 United States presidential election"""
 
 import os
 import sys
@@ -14,6 +14,18 @@ __author__ = "Wyatt Entrekin"
 __version__ = "1.0.0"
 __email__ = "wmentrekin@gmail.com"
 __status__ = "Production"
+
+#####################
+##      TO-DO      ##
+#####################
+#1) Create static list of Polls separated by Pollster
+#2) Normalize all Polls based on the grade and bias of their Pollster
+#3) Create static list of Polls separated by State
+#4) Aggregate all Polls for each state into one rating
+#5) Apply Poll rating to 2016 election results for each State
+#6) Create a distribution of possible Outcomes for each State
+#7) Run 10,000 random numbers on the distribution for each State
+#8) Visualize results
 
 #Scrapes state data
 def state_scrape():
@@ -171,8 +183,6 @@ class Poll:
 		self.d = d
 		self.r = r
 		self.error = error
-		# Poll.poll_by_state[self.state.name].append(self)
-		# Poll.poll_by_pollster[self.pollster].append(self)
 		Poll.polls.append(self)
 
 	def __str__(self):
