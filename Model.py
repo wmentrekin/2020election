@@ -22,16 +22,21 @@ def state_scrape():
 
 	#Name & Population
 	populations = pd.read_csv('data/populations.csv') #File Downloaded from Census.gov
+	count = 1
 	for population in populations.iterrows():
 		state_dict = {}
 		state_dict['population'] = population[1]['P001001'].split('(')[0]
 		states[str(population[1]['NAME'])] = state_dict
+
+		print('Scraping Data for State Populations: ' + str(count) + '/51')
+		count += 1
 
 	#2016 Election Results
 	loc = ("data/federalelections2016.xlsx") #File Downloaded from FEC Website
 	wb = xlrd.open_workbook(loc)
 	sheet = wb.sheet_by_index(2)
 	results = []
+	count = 1
 	for i in range(55):
 		if i > 3:
 			result = {}
@@ -43,6 +48,8 @@ def state_scrape():
 			else:
 				result['EV'] = sheet.cell_value(i, 2)
 			results.append(result)
+			print('Scraping Data for 2016 Election Results: ' + str(count) + '/51')
+			count += 1
 	count = 0
 	for state in states:
 		states[state]['2016'] = results[count]
@@ -72,12 +79,16 @@ def pollster_scrape():
 		pollster['grade'] = grades[i].text[1::]
 		pollster['bias'] = bias[i].text.split('+')
 		pollsters.append(pollster)
+		print('Scraping Data on Reputable Pollsters: ' + str(i + 1) + '/20')
 
 	return pollsters
 
 #Scrapes the poll data
 def poll_scraper():
+
 	polls = []
+
+	#Scraping Polls for Each State
 	base = 'https://www.270towin.com/2020-polls-biden-trump/'
 	for state in State.states:
 		name = state.name.lower().replace(' ', '-')
@@ -89,6 +100,9 @@ def poll_scraper():
 		d = soup.find_all('td', candidate_id='D')
 		r = soup.find_all('td', candidate_id='R')
 		errors = soup.find_all('td', class_='poll_sample')
+		print('Scraping Data for Polls Conducted in ' + str(state.name))
+
+		#Gathering Data for Each Poll
 		for i in range(len(dates)):
 			polldict = {}
 			polldict['state'] = state
@@ -99,6 +113,7 @@ def poll_scraper():
 			error = errors[i].text.split(' &plusmn')
 			polldict['error'] = 0 if len(error) == 1 else error[1].split('%')[0]
 			polls.append(polldict)
+
 	return polls
 
 #Creates State class and does some calculations
@@ -156,36 +171,63 @@ class Poll:
 		self.d = d
 		self.r = r
 		self.error = error
-		Poll.poll_by_state[self.state.name].append(self)
-		Poll.poll_by_pollster[self.pollster].append(self)
+		# Poll.poll_by_state[self.state.name].append(self)
+		# Poll.poll_by_pollster[self.pollster].append(self)
 		Poll.polls.append(self)
 
 	def __str__(self):
-		return "{} conducted a poll in {} on {} which had Biden at {} and Trump at {} with an error of {}".format(self.pollster, self.state, self.date, self.d, self.r, self.error)
+		return "{} conducted a poll in {} on {} which had Biden at {} and Trump at {} with an error of {}%.".format(self.pollster.name, self.state.name, self.date, self.d, self.r, self.error)
 
 #Creates State Objects
 def create_states(states):
+	count = 1
 	for state in states.keys():
+		print('Instantiating State Objects: ' + str(count) + '/51')
+		count += 1
 		State(state, states[state]['2016']['EV'], states[state]['population'], (states[state]['2016']['D'], states[state]['2016']['R'], states[state]['2016']['Total']))
 
 #Creates Pollster Objects
 def create_pollsters(pollsters):
+
+	count = 1
 	for pollster in pollsters:
+		print('Instanting Pollster Objects: ' + str(count) + '/20')
+		count += 1
+
+		#Checking if Pollster is Reputable, Then Instantiating Reference
 		if pollster['grade'] in ['A+', 'A', 'A-', 'B+', 'B', 'B-']:
 			Pollster(pollster['name'], pollster['grade'], pollster['bias'])
 
 #Creates Poll Objects
 def create_polls(polls):
-	pollsters = [pollster.name for pollster in Pollster.pollsters]
-	for pollster in pollsters:
-		print(pollster)
-	# for poll in polls:
-	# 	print(poll)
-	# for poll in polls:
-	# 	if poll['pollster'] in pollsters:
-	# 		Poll(poll['state'], poll['date'], poll['pollster'], poll['D'], poll['R'], poll['error'])
-	# print(Poll.polls)
 
+	#Normalizing Pollster Names Between Pollster Instances & Polls
+	names = {'SurveyUSA': 'SurveyUSA',
+			 'Mason-Dixon': 'Mason-Dixon Polling & Strategy',
+			 'Public Policy': 'Public Policy Polling',
+			 'YouGov': 'YouGov',
+			 'American Research Group': 'American Research Group',
+			 'Quinnipiac': 'Quinnipiac University',
+			 'NBC News/Marist': 'Marist College',
+			 'Emerson College': 'Emerson College',
+			 'InsiderAdvantage': 'Opinion Savvy/InsiderAdvantage',
+			 'Univ. of New Hampshire': 'University of New Hampshire',
+			 'Monmouth University': 'Monmouth University',
+			 'CNN//SSRS': 'CNN/Opinion Research Corp.'}
+	new_polls = []
+	for poll in polls:
+		if poll['pollster'] in names.keys():
+			poll['pollster'] = names[poll['pollster']]
+			new_polls.append(poll)
+
+	#Instantiating Poll References
+	success = 0
+	for pollster in Pollster.pollsters:
+		for poll in new_polls:
+			if pollster.name == poll['pollster']:
+				Poll(poll['state'], poll['date'], pollster, poll['D'], poll['R'], poll['error'])
+				success += 1
+				print('Instantiating Poll Objects: ' + str(success) + '/' + str(len(new_polls)))
 
 #Normalizes Polls with Pollster Ratings
 
@@ -199,6 +241,8 @@ def create_polls(polls):
 
 #Run Model
 def model():
+
+	#Scraping & Instantiating States, Pollsters, & Polls
 	create_states(state_scrape())
 	create_pollsters(pollster_scrape())
 	create_polls(poll_scraper())
