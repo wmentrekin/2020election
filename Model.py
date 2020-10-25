@@ -18,14 +18,12 @@ __status__ = "Production"
 #####################
 ##      TO-DO      ##
 #####################
-#1) Create static list of Polls separated by Pollster
-#2) Normalize all Polls based on the grade and bias of their Pollster
-#3) Create static list of Polls separated by State
-#4) Aggregate all Polls for each state into one rating
-#5) Apply Poll rating to 2016 election results for each State
-#6) Create a distribution of possible Outcomes for each State
-#7) Run 10,000 random numbers on the distribution for each State
-#8) Visualize results
+#1) Create static list of Polls separated by State
+#2) Aggregate all Polls for each state into one rating
+#3) Apply Poll rating to 2016 election results for each State
+#4) Create a distribution of possible Outcomes for each State
+#5) Run 10,000 random numbers on the distribution for each State
+#6) Visualize results
 
 #Scrapes state data
 def state_scrape():
@@ -144,9 +142,6 @@ class State:
 	def __str__(self):
 		return "{} has {} electoral votes and a population of {}".format(self.name, self.ev, self.population)
 
-	def set_polls(self):
-		self.polls = Poll.poll_by_state[self.name]
-
 #Creates pollster class and measure the accuracy of each pollster
 class Pollster:
 
@@ -169,20 +164,13 @@ class Poll:
 
 	polls = []
 
-	poll_by_state = {}
-	for state in State.states:
-		poll_by_state[state.name] = []
-	poll_by_pollster = {}
-	for pollster in Pollster.pollsters:
-		poll_by_state[pollster.name] = []
-
 	def __init__(self, state, date, pollster, d, r, error):
 		self.state = state
 		self.date = date
 		self.pollster = pollster
-		self.d = d
-		self.r = r
-		self.error = error
+		self.d = float(d)
+		self.r = float(r)
+		self.error = float(error)
 		Poll.polls.append(self)
 
 	def __str__(self):
@@ -240,6 +228,32 @@ def create_polls(polls):
 				print('Instantiating Poll Objects: ' + str(success) + '/' + str(len(new_polls)))
 
 #Normalizes Polls with Pollster Ratings
+def normalize():
+
+	#Groups Polls by Pollster
+	polls_by_pollster = {}
+
+	for pollster in Pollster.pollsters:
+		pollster_name = pollster.name
+		polls_by_pollster[pollster] = []
+		for poll in Poll.polls:
+			poll_name = poll.pollster.name
+			if pollster_name == poll_name:
+				polls_by_pollster[pollster].append(poll)
+
+	#Normalizes Polls according to Pollster grade and bias
+	error_multipliers = {'A+': 1.0, 'A': 1.2, 'A-': 1.4, 'B+': 1.6, 'B': 1.8, 'B-': 2.0}
+	for key in polls_by_pollster.keys():
+		grade = key.grade
+		error_multiplier = error_multipliers[grade]
+		bias_party = key.bias[0]
+		bias_amount = float(key.bias[1])
+		for poll in polls_by_pollster[key]:
+			poll.error *= error_multiplier
+			if bias_party == 'D':
+				poll.d -= bias_amount
+			else:
+				poll.r -= bias_amount
 
 #Aggregates Normalized Polls by State & Date into Single Rating
 
@@ -256,6 +270,9 @@ def model():
 	create_states(state_scrape())
 	create_pollsters(pollster_scrape())
 	create_polls(poll_scraper())
+
+	#Groups Polls by Pollster, Normalizes Polls according to Pollster grade and bias
+	normalize()
 
 if __name__ == "__main__":
 	model()
