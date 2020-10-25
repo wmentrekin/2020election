@@ -6,8 +6,10 @@ import os
 import sys
 
 from bs4 import BeautifulSoup
+import math
 import pandas as pd
 import requests
+from scipy.stats import binom
 import xlrd
 
 __author__ = "Wyatt Entrekin"
@@ -18,12 +20,10 @@ __status__ = "Production"
 #####################
 ##      TO-DO      ##
 #####################
-#1) Create static list of Polls separated by State
-#2) Aggregate all Polls for each state into one rating
-#3) Apply Poll rating to 2016 election results for each State
-#4) Create a distribution of possible Outcomes for each State
-#5) Run 10,000 random numbers on the distribution for each State
-#6) Visualize results
+#1) Apply Poll rating to 2016 election results for each State
+#2) Create a distribution of possible Outcomes for each State
+#3) Run 10,000 random numbers on the distribution for each State
+#4) Visualize results
 
 #Scrapes state data
 def state_scrape():
@@ -52,7 +52,7 @@ def state_scrape():
 			result = {}
 			result['D'] = sheet.cell_value(i, 4)
 			result['R'] = sheet.cell_value(i, 3)
-			result['Total'] = sheet.cell_value(i, 5)
+			result['Total'] = sheet.cell_value(i, 6)
 			if result['R'] > result['D']:
 				result['EV'] = sheet.cell_value(i, 1)
 			else:
@@ -136,7 +136,7 @@ class State:
 		self.ev = int(ev)
 		self.population = int(population)
 		self.election16 = {"D": int(election16[0]), "R": int(election16[1]), "Total": int(election16[2])}
-		self.polls = []
+		self.poll_rating = {}
 		State.states.append(self)
 
 	def __str__(self):
@@ -233,15 +233,19 @@ def normalize():
 	#Groups Polls by Pollster
 	polls_by_pollster = {}
 
+	count = 0
 	for pollster in Pollster.pollsters:
 		pollster_name = pollster.name
 		polls_by_pollster[pollster] = []
 		for poll in Poll.polls:
 			poll_name = poll.pollster.name
 			if pollster_name == poll_name:
+				print('Grouping Polls by Pollster: ' + str(count + 1) + '/' + str(len(Poll.polls)))
+				count += 1
 				polls_by_pollster[pollster].append(poll)
 
 	#Normalizes Polls according to Pollster grade and bias
+	count = 0
 	error_multipliers = {'A+': 1.0, 'A': 1.2, 'A-': 1.4, 'B+': 1.6, 'B': 1.8, 'B-': 2.0}
 	for key in polls_by_pollster.keys():
 		grade = key.grade
@@ -254,8 +258,58 @@ def normalize():
 				poll.d -= bias_amount
 			else:
 				poll.r -= bias_amount
+			print('Normalizing Polls according to Pollster bias and grade: ' + str(count + 1) + '/' + str(len(Poll.polls)))
+			count += 1
 
 #Aggregates Normalized Polls by State & Date into Single Rating
+def aggregate():
+
+	#Group Polls by State
+	polls_by_state = {}
+
+	count = 0
+	for state in State.states:
+		state_name = state.name
+		polls_by_state[state] = []
+		for poll in Poll.polls:
+			poll_state = poll.state.name
+			if state_name == poll_state:
+				print('Grouping Polls by State: ' + str(count + 1) + '/' + str(len(Poll.polls)))
+				count += 1
+				polls_by_state[state].append(poll)
+	
+	#Aggregating Polls into singular rating for each State
+	count = 0
+	for key in polls_by_state.keys():
+		rating = {}
+		d_sum = 0
+		r_sum = 0
+		error_sq_sum = 0
+		n = len(polls_by_state[key])
+		if n > 0:
+			for poll in polls_by_state[key]:
+				d_sum += poll.d
+				r_sum += poll.r
+				error_sq_sum += poll.error**2
+			rating['D'] = round(d_sum / n, 1)
+			rating['R'] = round(r_sum / n, 1)
+			rating['error'] = round(math.sqrt(error_sq_sum), 2)
+		else:
+			n = key.election16['Total']
+			d = key.election16['D']
+			r = key.election16['R']
+			prob_d = d / n
+			prob_r = r / n
+			var_d = binom.var(n, prob_d)
+			var_r = binom.var(n, prob_r)
+			se_d = math.sqrt(var_d / n)
+			se_r = math.sqrt(var_r / n)
+			rating['D'] = round(100 * prob_d, 1)
+			rating['R'] = round(100 * prob_r, 1)
+			rating['error'] = round(math.sqrt(se_d**2 + se_r**2), 2)
+		print('Aggregating Polls into singular rating for each State: ' + str(count + 1) + '/' + str(len(State.states)))
+		count += 1
+		key.poll_rating = rating
 
 #Creates Distribution for both candidates in all states
 
@@ -273,6 +327,9 @@ def model():
 
 	#Groups Polls by Pollster, Normalizes Polls according to Pollster grade and bias
 	normalize()
+
+	#Groups Polls by State, Aggregates Polls into singular rating for each state
+	aggregate()
 
 if __name__ == "__main__":
 	model()
