@@ -7,6 +7,9 @@ import sys
 
 from bs4 import BeautifulSoup
 import math
+import matplotlib.pyplot as plt
+from mpl_toolkits.basemap import Basemap
+from matplotlib.patches import Polygon
 import numpy as np
 import pandas as pd
 import requests
@@ -338,7 +341,7 @@ def simulate():
 
 #Visualizes the Model
 def visualize():
-	print('Visualizing Model')
+	print('Visualize')
 
 #Run Model
 def model():
