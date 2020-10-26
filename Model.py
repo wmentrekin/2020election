@@ -277,7 +277,7 @@ def aggregate():
 		key.poll_rating = rating
 
 #Creates Distribution for both candidates in all States, Runs 10,000 simulations in each State
-def simulations():
+def simulate():
 
 	simulations = {}
 
@@ -337,7 +337,7 @@ def simulations():
 		state.simulations = simulations
 
 #Visualizes the Model
-def visualizer():
+def visualize():
 	print('Visualizing Model')
 
 #Run Model
@@ -355,10 +355,10 @@ def model():
 	aggregate()
 
 	#Creates Distribution for both candidates in all States, Runs 10,000 simulations in each State
-	simulations()
+	simulate()
 
 	#Visualizes the Model
-	visualizer()
+	visualize()
 
 if __name__ == "__main__":
 	model()
