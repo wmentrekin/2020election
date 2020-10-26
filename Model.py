@@ -7,23 +7,17 @@ import sys
 
 from bs4 import BeautifulSoup
 import math
+import numpy as np
 import pandas as pd
 import requests
 from scipy.stats import binom
+import statistics
 import xlrd
 
 __author__ = "Wyatt Entrekin"
 __version__ = "1.0.0"
 __email__ = "wmentrekin@gmail.com"
 __status__ = "Production"
-
-#####################
-##      TO-DO      ##
-#####################
-#1) Apply Poll rating to 2016 election results for each State
-#2) Create a distribution of possible Outcomes for each State
-#3) Run 10,000 random numbers on the distribution for each State
-#4) Visualize results
 
 #Scrapes state data
 def state_scrape():
@@ -32,21 +26,16 @@ def state_scrape():
 
 	#Name & Population
 	populations = pd.read_csv('data/populations.csv') #File Downloaded from Census.gov
-	count = 1
 	for population in populations.iterrows():
 		state_dict = {}
 		state_dict['population'] = population[1]['P001001'].split('(')[0]
 		states[str(population[1]['NAME'])] = state_dict
-
-		print('Scraping Data for State Populations: ' + str(count) + '/51')
-		count += 1
 
 	#2016 Election Results
 	loc = ("data/federalelections2016.xlsx") #File Downloaded from FEC Website
 	wb = xlrd.open_workbook(loc)
 	sheet = wb.sheet_by_index(2)
 	results = []
-	count = 1
 	for i in range(55):
 		if i > 3:
 			result = {}
@@ -58,8 +47,6 @@ def state_scrape():
 			else:
 				result['EV'] = sheet.cell_value(i, 2)
 			results.append(result)
-			print('Scraping Data for 2016 Election Results: ' + str(count) + '/51')
-			count += 1
 	count = 0
 	for state in states:
 		states[state]['2016'] = results[count]
@@ -89,7 +76,6 @@ def pollster_scrape():
 		pollster['grade'] = grades[i].text[1::]
 		pollster['bias'] = bias[i].text.split('+')
 		pollsters.append(pollster)
-		print('Scraping Data on Reputable Pollsters: ' + str(i + 1) + '/20')
 
 	return pollsters
 
@@ -110,7 +96,6 @@ def poll_scraper():
 		d = soup.find_all('td', candidate_id='D')
 		r = soup.find_all('td', candidate_id='R')
 		errors = soup.find_all('td', class_='poll_sample')
-		print('Scraping Data for Polls Conducted in ' + str(state.name))
 
 		#Gathering Data for Each Poll
 		for i in range(len(dates)):
@@ -126,23 +111,27 @@ def poll_scraper():
 
 	return polls
 
-#Creates State class and does some calculations
+#Creates State class
 class State:
 
 	states = []
 
 	def __init__(self, name, ev, population, election16):
 		self.name = str(name)
-		self.ev = int(ev)
+		if name == 'Maine':
+			self.ev = int(ev) + 1
+		else:
+			self.ev = int(ev)
 		self.population = int(population)
 		self.election16 = {"D": int(election16[0]), "R": int(election16[1]), "Total": int(election16[2])}
 		self.poll_rating = {}
+		self.simulations = {}
 		State.states.append(self)
 
 	def __str__(self):
 		return "{} has {} electoral votes and a population of {}".format(self.name, self.ev, self.population)
 
-#Creates pollster class and measure the accuracy of each pollster
+#Creates Pollster class
 class Pollster:
 
 	pollsters = []
@@ -156,10 +145,7 @@ class Pollster:
 	def __str__(self):
 		return "{} has a grade of {} from 538 and a mean-reverted bias of {}+{}%.".format(self.name, self.grade, self.bias[0], self.bias[1])
 
-	def set_correction(self):
-		self.correction2016 = 0
-
-#Create poll class and organizes them by pollster and state
+#Create Poll class
 class Poll:
 
 	polls = []
@@ -178,21 +164,15 @@ class Poll:
 
 #Creates State Objects
 def create_states(states):
-	count = 1
+
 	for state in states.keys():
-		print('Instantiating State Objects: ' + str(count) + '/51')
-		count += 1
 		State(state, states[state]['2016']['EV'], states[state]['population'], (states[state]['2016']['D'], states[state]['2016']['R'], states[state]['2016']['Total']))
 
 #Creates Pollster Objects
 def create_pollsters(pollsters):
 
-	count = 1
+	#Checking if Pollster is Reputable, Then Instantiating Reference
 	for pollster in pollsters:
-		print('Instanting Pollster Objects: ' + str(count) + '/20')
-		count += 1
-
-		#Checking if Pollster is Reputable, Then Instantiating Reference
 		if pollster['grade'] in ['A+', 'A', 'A-', 'B+', 'B', 'B-']:
 			Pollster(pollster['name'], pollster['grade'], pollster['bias'])
 
@@ -219,13 +199,10 @@ def create_polls(polls):
 			new_polls.append(poll)
 
 	#Instantiating Poll References
-	success = 0
 	for pollster in Pollster.pollsters:
 		for poll in new_polls:
 			if pollster.name == poll['pollster']:
 				Poll(poll['state'], poll['date'], pollster, poll['D'], poll['R'], poll['error'])
-				success += 1
-				print('Instantiating Poll Objects: ' + str(success) + '/' + str(len(new_polls)))
 
 #Normalizes Polls with Pollster Ratings
 def normalize():
@@ -233,19 +210,15 @@ def normalize():
 	#Groups Polls by Pollster
 	polls_by_pollster = {}
 
-	count = 0
 	for pollster in Pollster.pollsters:
 		pollster_name = pollster.name
 		polls_by_pollster[pollster] = []
 		for poll in Poll.polls:
 			poll_name = poll.pollster.name
 			if pollster_name == poll_name:
-				print('Grouping Polls by Pollster: ' + str(count + 1) + '/' + str(len(Poll.polls)))
-				count += 1
 				polls_by_pollster[pollster].append(poll)
 
 	#Normalizes Polls according to Pollster grade and bias
-	count = 0
 	error_multipliers = {'A+': 1.0, 'A': 1.2, 'A-': 1.4, 'B+': 1.6, 'B': 1.8, 'B-': 2.0}
 	for key in polls_by_pollster.keys():
 		grade = key.grade
@@ -258,8 +231,6 @@ def normalize():
 				poll.d -= bias_amount
 			else:
 				poll.r -= bias_amount
-			print('Normalizing Polls according to Pollster bias and grade: ' + str(count + 1) + '/' + str(len(Poll.polls)))
-			count += 1
 
 #Aggregates Normalized Polls by State & Date into Single Rating
 def aggregate():
@@ -267,19 +238,15 @@ def aggregate():
 	#Group Polls by State
 	polls_by_state = {}
 
-	count = 0
 	for state in State.states:
 		state_name = state.name
 		polls_by_state[state] = []
 		for poll in Poll.polls:
 			poll_state = poll.state.name
 			if state_name == poll_state:
-				print('Grouping Polls by State: ' + str(count + 1) + '/' + str(len(Poll.polls)))
-				count += 1
 				polls_by_state[state].append(poll)
 	
 	#Aggregating Polls into singular rating for each State
-	count = 0
 	for key in polls_by_state.keys():
 		rating = {}
 		d_sum = 0
@@ -307,15 +274,71 @@ def aggregate():
 			rating['D'] = round(100 * prob_d, 1)
 			rating['R'] = round(100 * prob_r, 1)
 			rating['error'] = round(math.sqrt(se_d**2 + se_r**2), 2)
-		print('Aggregating Polls into singular rating for each State: ' + str(count + 1) + '/' + str(len(State.states)))
-		count += 1
 		key.poll_rating = rating
 
-#Creates Distribution for both candidates in all states
+#Creates Distribution for both candidates in all States, Runs 10,000 simulations in each State
+def simulations():
 
-#Runs random numbers on distribution
+	simulations = {}
 
-#Aggregates model
+	for state in State.states:
+
+		n = state.election16['Total']
+		e_poll = state.poll_rating['error']
+
+		#Vote Percent in 2016
+		d_16 = 100 * state.election16['D'] / n
+		r_16 = 100 * state.election16['R'] / n
+
+		#Poll Percent
+		d_poll = state.poll_rating['D']
+		r_poll = state.poll_rating['R']
+
+		#Standard Deviations
+		sigma_d = math.sqrt((d_poll - d_16)**2) + (e_poll / 100)
+		sigma_r = math.sqrt((r_poll - r_16)**2) + (e_poll / 100)
+
+		#Means
+		mu_d = (d_16 + 2 * d_poll) / 3
+		mu_r = (r_16 + 2 * r_poll) / 3
+
+		#Distributions
+		dist_d = np.random.normal(mu_d, sigma_d, 10000)
+		dist_r = np.random.normal(mu_r, sigma_r, 10000)
+
+		#Counting which candidate wins State what % of the time
+		races_won_d = 0
+		races_won_r = 0
+		races = dist_d - dist_r
+		for race in races:
+			if race > 0:
+				races_won_d += 1
+			else:
+				races_won_r += 1
+		win_pct_d = round(100 * races_won_d / 10000, 2)
+		win_pct_r = round(100 * races_won_r / 10000, 2)
+
+		#Average Vote Share
+		vote_pct_d = round(statistics.mean(dist_d), 2)
+		vote_pct_r = round(statistics.mean(dist_r), 2)
+
+		#Average Margin of Victory
+		winner = 'Joe Biden' if vote_pct_d > vote_pct_r else 'Donald Trump'
+		margin = round((vote_pct_d - vote_pct_r),2) if winner == 'Joe Biden' else round((vote_pct_r - vote_pct_d),2)
+
+		#Storing Simulation
+		simulations['win_pct_d'] = win_pct_d
+		simulations['win_pct_r'] = win_pct_r
+		simulations['vote_pct_d'] = vote_pct_d
+		simulations['vote_pct_r'] = vote_pct_r
+		simulations['margin'] = margin
+		simulations['winner'] = winner
+
+		state.simulations = simulations
+
+#Visualizes the Model
+def visualizer():
+	print('Visualizing Model')
 
 #Run Model
 def model():
@@ -330,6 +353,12 @@ def model():
 
 	#Groups Polls by State, Aggregates Polls into singular rating for each state
 	aggregate()
+
+	#Creates Distribution for both candidates in all States, Runs 10,000 simulations in each State
+	simulations()
+
+	#Visualizes the Model
+	visualizer()
 
 if __name__ == "__main__":
 	model()
