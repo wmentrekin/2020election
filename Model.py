@@ -416,8 +416,6 @@ def visualize(margins):
 	m_.plot(x1,y1,color=light_gray,linewidth=0.8)
 	m_.plot(x2,y2,color=light_gray,linewidth=0.8)
 
-	ax.set_title('Average Margin of Victory')
-
 	plt.savefig('map.png')
 
 #Output CSV files with result data

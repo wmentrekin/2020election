@@ -47,31 +47,7 @@
     <h2>Average Margin of Victory</h2>
     <img src="map.png" alt="Average Margin of Victory" width="800" height="536">
   </div>
-  
-  <table>
-    <tr>
-        <td>State</td>
-        <td>Projected Winner</td>
-        <td>Trump Projected Vote</td>
-        <td>Biden Projected Vote</td>
-        <td>Projected Margin</td>
-        <td>Trump Chance</td>
-        <td>Biden Chance</td>
-    </tr>
-    <?php
-        $fp = fopen ( "/results/full_results.csv" , "r" );
-        while (( $data = fgetcsv ( $fp , 1000 , "," )) !== FALSE ) {
-            $i = 0;
-            echo "<tr>";
-            foreach($data as $row) {
-               echo "<td>" . $row . "</td>";
-               $i++ ;
-            }
-            echo "/<tr>";
-        }
-        fclose ( $fp );
-    ?>
-    </table>
+
 
 </body>
 
