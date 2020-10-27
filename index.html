@@ -48,15 +48,25 @@
     <img src="map.png" alt="Average Margin of Victory" width="800" height="536">
   </div>
   
-  <div id="CSVTable"></div>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script src="//jquerycsvtotable.googlecode.com/files/jquery.csvToTable.js"></script>
-
-  <script>
-    $(function() {
-      $('#CSVTable').CSVToTable('/results/full_results.csv');
-    });
-  </script>
+  <table>
+    <tr>
+        <td>Header 1</td>
+        <td>Header 2</td>
+    </tr>
+    <?php
+        $fp = fopen ( "file.csv" , "r" );
+        while (( $data = fgetcsv ( $fp , 1000 , "," )) !== FALSE ) {
+            $i = 0;
+            echo "<tr>";
+            foreach($data as $row) {
+               echo "<td>" . $row . "</td>";
+               $i++ ;
+            }
+            echo "/<tr>";
+        }
+        fclose ( $fp );
+        ?>
+    </table>
 
 </body>
 
