@@ -8,8 +8,10 @@ import sys
 from bs4 import BeautifulSoup
 import math
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
+from mpl_toolkits.basemap import Basemap as Basemap
+from matplotlib.colors import rgb2hex, Normalize
 from matplotlib.patches import Polygon
+from matplotlib.colorbar import ColorbarBase
 import numpy as np
 import pandas as pd
 import requests
@@ -282,9 +284,11 @@ def aggregate():
 #Creates Distribution for both candidates in all States, Runs 10,000 simulations in each State
 def simulate():
 
-	simulations = {}
+	margins = {}
 
 	for state in State.states:
+
+		simulations = {}
 
 		n = state.election16['Total']
 		e_poll = state.poll_rating['error']
@@ -339,9 +343,82 @@ def simulate():
 
 		state.simulations = simulations
 
+		margins[state.name] = (margin, winner)
+
+	return margins
+
 #Visualizes the Model
-def visualize():
-	print('Visualize')
+def visualize(margins):
+
+	fig, ax = plt.subplots()
+
+	#Lambert Conformal map of lower 48 states.
+	m = Basemap(llcrnrlon = -119, llcrnrlat = 20, urcrnrlon = -64, urcrnrlat = 49, projection = 'lcc', lat_1 = 33, lat_2 = 45, lon_0 = -95)
+
+	#Mercator projection, for Alaska and Hawaii
+	m_ = Basemap(llcrnrlon = -190, llcrnrlat = 20, urcrnrlon = -143, urcrnrlat = 46, projection = 'merc', lat_ts = 20)
+
+	#Draw State Borders
+	shp_info = m.readshapefile('st99_d00', 'states', drawbounds = True, linewidth = 0.45, color = 'gray')
+	shp_info_ = m_.readshapefile('st99_d00','states', drawbounds = False)
+
+	#Assign States a color based on their margins
+	colors = {}
+	statenames = []
+	cmap_r = plt.cm.Reds
+	cmap_d = plt.cm.Blues
+	vmin = 0
+	vmax = 20
+	norm = Normalize(vmin = vmin, vmax = vmax)
+	for shapedict in m.states_info:
+		statename = shapedict['NAME']
+		if statename != 'Puerto Rico':
+			margin = margins[statename][0]
+			winner = margins[statename][1]
+			if winner == 'Joe Biden':
+				colors[statename] = cmap_d(np.sqrt((margin - vmin) / (vmax - vmin)))[:3]
+			else:
+				colors[statename] = cmap_r(np.sqrt((margin - vmin) / (vmax - vmin)))[:3]
+		statenames.append(statename)
+
+	for nshape, seg in enumerate(m.states):
+		if statenames[nshape] != 'Puerto Rico':
+			color = rgb2hex(colors[statenames[nshape]])
+			poly = Polygon(seg, facecolor = color, edgecolor = color)
+			ax.add_patch(poly)
+
+	#Resize and move Alaska and Hawaii
+	AREA_1 = 0.005
+	AREA_2 = AREA_1 * 30.0
+	AK_SCALE = 0.19
+	HI_OFFSET_X = -1900000
+	HI_OFFSET_Y = 250000
+	AK_OFFSET_X = -250000
+	AK_OFFSET_Y = -750000
+
+	for nshape, shapedict in enumerate(m_.states_info):
+		if shapedict['NAME'] in ['Alaska', 'Hawaii']:
+			seg = m_.states[int(shapedict['SHAPENUM'] - 1)]
+			if shapedict['NAME'] == 'Hawaii' and float(shapedict['AREA']) > AREA_1:
+				seg = [(x + HI_OFFSET_X, y + HI_OFFSET_Y) for x, y in seg]
+				color = rgb2hex(colors[statenames[nshape]])
+			elif shapedict['NAME'] == 'Alaska' and float(shapedict['AREA']) > AREA_2:
+				seg = [(x*AK_SCALE + AK_OFFSET_X, y*AK_SCALE + AK_OFFSET_Y)\
+					   for x, y in seg]
+				color = rgb2hex(colors[statenames[nshape]])
+			poly = Polygon(seg, facecolor=color, edgecolor='gray', linewidth=.45)
+			ax.add_patch(poly)
+
+	#Plot Bounding Boxes for Alaska and Hawaii
+	light_gray = [0.8]*3
+	x1,y1 = m_([-190,-183,-180,-180,-175,-171,-171],[29,29,26,26,26,22,20])
+	x2,y2 = m_([-180,-180,-177],[26,23,20])
+	m_.plot(x1,y1,color=light_gray,linewidth=0.8)
+	m_.plot(x2,y2,color=light_gray,linewidth=0.8)
+
+	ax.set_title('Average Margin of Victory')
+
+	plt.savefig('map.png')
 
 #Run Model
 def model():
@@ -358,10 +435,10 @@ def model():
 	aggregate()
 
 	#Creates Distribution for both candidates in all States, Runs 10,000 simulations in each State
-	simulate()
+	margins = simulate()
 
 	#Visualizes the Model
-	visualize()
+	visualize(margins)
 
 if __name__ == "__main__":
 	model()
