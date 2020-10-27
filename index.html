@@ -50,8 +50,13 @@
   
   <table>
     <tr>
-        <td>Header 1</td>
-        <td>Header 2</td>
+        <td>State</td>
+        <td>Projected Winner</td>
+        <td>Trump Projected Vote</td>
+        <td>Biden Projected Vote</td>
+        <td>Projected Margin</td>
+        <td>Trump Chance</td>
+        <td>Biden Chance</td>
     </tr>
     <?php
         $fp = fopen ( "/results/full_results.csv" , "r" );
@@ -65,7 +70,7 @@
             echo "/<tr>";
         }
         fclose ( $fp );
-        ?>
+    ?>
     </table>
 
 </body>
