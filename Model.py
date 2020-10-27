@@ -416,15 +416,16 @@ def visualize(margins):
 	m_.plot(x1,y1,color=light_gray,linewidth=0.8)
 	m_.plot(x2,y2,color=light_gray,linewidth=0.8)
 
-	plt.savefig('map.png')
+	plt.savefig('results/map.png')
 
 #Output CSV files with result data
 def write_results():
 
 	#Create CSV for States with closest projected margins
+	closest_margins = []
 	closest_margins_fields = ['State', 'Projected Margin', 'Projected Winner']
+	closest_margins.append(closest_margins_fields)
 	closest_margins_rows = []
-	closest_margins_rows.append(closest_margins_fields)
 	for state in State.states:
 		row = []
 		if state.simulations['margin'] < 10:
@@ -435,113 +436,24 @@ def write_results():
 	closest_margins_rows = sorted(closest_margins_rows, key=lambda row: row[1])
 	for row in closest_margins_rows:
 		row[1] = str(row[1]) + '%'
+	for i in range(len(closest_margins_rows)):
+		closest_margins.append(closest_margins_rows[i])
 
 	#Create HTML Table
-	cols = ["<td>{0}</td>".format( "</td><td>".join(t)) for t in closest_margins_rows]
+	cols = ["<td>{0}</td>".format( "</td><td>".join(t)) for t in closest_margins]
 	rows = "<tr>{0}</tr>".format( "</tr>\n<tr>".join(cols))
-	display = open("tables/closest_margins.html", 'w')
-	display.write("""<HTML> <body>
+	file = open("tables/closest_margins.html", 'r+')
+	file.truncate(0)
+	file.close()
+	file = open("tables/closest_margins.html", 'w')
+	file.write("""<HTML> <body>
                     	<h2>Closest Projected Margins of Victory</h2>
-                            <table>  
+                            <table>
                               {0}  
                             </table>
                         </body>  
                   </HTML>""".format(rows))
-
-	with open('results/closest_margins.csv', 'w') as csv_file:
-		csv_writer = csv.writer(csv_file)
-		csv_writer.writerows(closest_margins_rows)
-
-	#Create CSV for most lopsided States
-	lopsided_fields = ['State', 'Projected Margin', 'Projected Winner']
-	lopsided_rows = []
-	for state in State.states:
-		row = []
-		if state.simulations['margin'] > 25:
-			row.append(state.name)
-			row.append(state.simulations['margin'])
-			row.append(state.simulations['winner'])
-			lopsided_rows.append(row)
-	lopsided_rows = sorted(lopsided_rows, key=lambda row: row[1], reverse=True)
-	for row in lopsided_rows:
-		row[1] = str(row[1]) + '%'
-	
-	with open('results/lopsided.csv', 'w') as csv_file:
-		csv_writer = csv.writer(csv_file)
-		csv_writer.writerow(lopsided_fields)
-		csv_writer.writerows(lopsided_rows)
-
-	#Create CSV for States that are projected to flip from 2016
-	flips_fields = ['State', '2016 Winner', '2016 Margin', '2020 Projected Winner', '2020 Projected Margin']
-	flips_rows = []
-	for state in State.states:
-		row = []
-		d_16 = state.election16['D']
-		r_16 = state.election16['R']
-		winner_16 = 'Donald Trump' if r_16 > d_16 else 'Hillary Clinton'
-		winner_20 = state.simulations['winner']
-		if (winner_16 == 'Donald Trump' and winner_20 == 'Joe Biden') or (winner_16 == 'Hillary Clinton' and winner_20 == 'Donald Trump'):
-			row.append(state.name)
-			row.append(winner_16)
-			margin_16 = round(math.fabs(round(100 * d_16 / state.election16['Total'], 1) - round(100 * r_16 / state.election16['Total'], 1)), 2)
-			row.append(margin_16)
-			row.append(winner_20)
-			row.append(state.simulations['margin'])
-			flips_rows.append(row)
-	flips_rows = sorted(flips_rows, key=lambda row: row[4] + row[2])
-	for row in flips_rows:
-		row[2] = str(row[2]) + '%'
-		row[4] = str(row[4]) + '%'
-
-	with open('results/flips.csv', 'w') as csv_file:
-		csv_writer = csv.writer(csv_file)
-		csv_writer.writerow(flips_fields)
-		csv_writer.writerows(flips_rows)
-
-	#Create CSV for tossup States
-	tossups_fields = ['State', 'Trump Chance', 'Biden Chance']
-	tossups_rows = []
-	for state in State.states:
-		row = []
-		if 40 < state.simulations['win_pct_d'] < 60 and 40 < state.simulations['win_pct_r'] < 60:
-			row.append(state.name)
-			row.append(state.simulations['win_pct_r'])
-			row.append(state.simulations['win_pct_d'])
-			tossups_rows.append(row)
-	tossups_rows = sorted(tossups_rows, key=lambda row: math.fabs(row[2] - row[1]))
-	for row in tossups_rows:
-		row[1] = str(row[1]) + '%'
-		row[2] = str(row[2]) + '%'
-
-	with open('results/tossups.csv', 'w') as csv_file:
-		csv_writer = csv.writer(csv_file)
-		csv_writer.writerow(tossups_fields)
-		csv_writer.writerows(tossups_rows)
-
-	#Create CSV for full results
-	full_results_fields = ['State', 'Projected Winner', 'Trump Projected Vote', 'Biden Projected Vote', 'Projected Margin', 'Trump Chance', 'Biden Chance']
-	full_results_rows = []
-	for state in State.states:
-		row = []
-		row.append(state.name)
-		row.append(state.simulations['winner'])
-		row.append(state.simulations['vote_pct_r'])
-		row.append(state.simulations['vote_pct_d'])
-		row.append(state.simulations['margin'])
-		row.append(state.simulations['win_pct_r'])
-		row.append(state.simulations['win_pct_d'])
-		full_results_rows.append(row)
-	for row in full_results_rows:
-		row[2] = str(row[2]) + '%'
-		row[3] = str(row[3]) + '%'
-		row[4] = str(row[4]) + '%'
-		row[5] = str(row[5]) + '%'
-		row[6] = str(row[6]) + '%'
-
-	with open('results/full_results.csv', 'w') as csv_file:
-		csv_writer = csv.writer(csv_file)
-		csv_writer.writerow(full_results_fields)
-		csv_writer.writerows(full_results_rows)
+	file.close()
 
 #Run Model
 def model():
