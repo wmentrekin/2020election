@@ -54,22 +54,15 @@
        <tr><th>State</th><th>Projected Winner</th><th>Trump Vote</th><th>Biden Vote</th><th>Projected Margin</th><th>Trump Chance</th><th>Biden Chance</th></tr>
     </thead>
   
-    <tbody> <tr>
-       <td><span datafld='State'> </span></td>
-       <td><span datafld='Projected Winner'></span></td>
-       <td><span datafld='Trump Projected Vote'> </span></td>
-       <td><span datafld='Biden Projected Vote'> </span></td>
-       <td><span datafld='Projected Margin'> </span></td>
-       <td><span datafld='Trump Chance'> </span></td>
-       <td><span datafld='Biden Chance'> </span></td>
-    </tbody>
-  
-  </table>
-  
-  <object ID=data classid="clsid:333C7BC4-460F-11D0-BC04-0080C7055A83">
-    <param nAme="DataURL" value="/results/full_results.csv">
-    <param nAme="UseHeader" value="true">
-  </object>
+    <div id="CSVTable"></div>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="//jquerycsvtotable.googlecode.com/files/jquery.csvToTable.js"></script>
+
+    <script>
+      $(function() {
+        $('#CSVTable').CSVToTable('/results/full_results.csv');
+      });
+      </script>
   
   </body>
 
