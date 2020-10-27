@@ -48,20 +48,30 @@
     <img src="map.png" alt="Average Margin of Victory" width="800" height="536">
   </div>
 
-  <script type="text/javascript">
-    $.get('/results/full_results.csv', function(data) {
-      var build = '<table border="1" cellpadding="2" cellspacing="0" style="border-collapse: collapse" width="100%">\n';
-      var head = data.split("\n");
-      for(var i=0;i<1;i++){
-        build += "<tr><th>" + head[i] + "</th></tr>";
-        for(var i=1;i<head.length;i++){
-          build += "<tr><td>" + head[i].split("\n") + "</td></tr>";
-        }
-      } 
-      build += "</table>";
-      $('#wrap').append(build);
-    });
-  </script>
+  <table datasrc='#data'>
+  
+    <thead>
+       <tr><th>State</th><th>Projected Winner</th><th>Trump Vote</th><th>Biden Vote</th><th>Projected Margin</th><th>Trump Chance</th><th>Biden Chance</th></tr>
+    </thead>
+  
+    <tbody> <tr>
+       <td><span datafld='State'> </span></td>
+       <td><span datafld='Projected Winner'></span></td>
+       <td><span datafld='Trump Projected Vote'> </span></td>
+       <td><span datafld='Biden Projected Vote'> </span></td>
+       <td><span datafld='Projected Margin'> </span></td>
+       <td><span datafld='Trump Chance'> </span></td>
+       <td><span datafld='Biden Chance'> </span></td>
+    </tbody>
+  
+  </table>
+  
+  <object ID=data classid="clsid:333C7BC4-460F-11D0-BC04-0080C7055A83">
+    <param nAme="DataURL" value="/results/full_results.csv">
+    <param nAme="UseHeader" value="true">
+  </object>
+  
+  </body>
 
 </body>
 
