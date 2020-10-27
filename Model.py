@@ -435,6 +435,22 @@ def write_results():
 	for row in closest_margins_rows:
 		row[1] = str(row[1]) + '%'
 
+	#First, create the texts of the columns:
+	cols = ["<td>{0}</td>". format( "</td><td>".join(t)  ) for t in closest_margins_rows]
+
+	#then use it to join the rows (tr)
+	rows = "<tr>{0}</tr>".format( "</tr>\n<tr>".join(cols) )
+
+	#finaly, inject it into the html...
+	display = open("tables/closest_margins.html", 'w')
+	display.write("""<HTML> <body>
+                    	<h1>Attendance list</h1>
+                            <table>  
+                              {0}  
+                            </table>
+                        </body>  
+                  </HTML>""".format(rows))
+
 	with open('results/closest_margins.csv', 'w') as csv_file:
 		csv_writer = csv.writer(csv_file)
 		csv_writer.writerow(closest_margins_fields)
