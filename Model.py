@@ -444,7 +444,7 @@ def write_results():
 	#finaly, inject it into the html...
 	display = open("tables/closest_margins.html", 'w')
 	display.write("""<HTML> <body>
-                    	<h1>Attendance list</h1>
+                    	<h2>Closest Projected Margins of Victory</h2>
                             <table>  
                               {0}  
                             </table>
