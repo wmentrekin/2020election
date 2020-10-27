@@ -22,7 +22,6 @@ import xlrd
 __author__ = "Wyatt Entrekin"
 __version__ = "1.0.0"
 __email__ = "wmentrekin@gmail.com"
-__status__ = "Production"
 
 #Scrapes state data
 def state_scrape():
