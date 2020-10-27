@@ -54,7 +54,7 @@
         <td>Header 2</td>
     </tr>
     <?php
-        $fp = fopen ( "results/full_results.csv" , "r" );
+        $fp = fopen ( "/results/full_results.csv" , "r" );
         while (( $data = fgetcsv ( $fp , 1000 , "," )) !== FALSE ) {
             $i = 0;
             echo "<tr>";
