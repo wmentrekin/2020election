@@ -421,7 +421,7 @@ def visualize(margins):
 #Output CSV files with result data
 def write_results():
 
-	#Create CSV for States with closest projected margins
+	#Create HTML Table for States with closest projected margins
 	closest_margins = []
 	closest_margins_fields = ['State', 'Projected Margin', 'Projected Winner']
 	closest_margins.append(closest_margins_fields)
@@ -448,6 +448,40 @@ def write_results():
 	file = open("tables/closest_margins.html", 'w')
 	file.write("""<HTML> <body>
                     	<h2>Closest Projected Margins of Victory</h2>
+                            <table>
+                              {0}  
+                            </table>
+                        </body>  
+                  </HTML>""".format(rows))
+	file.close()
+
+	#Create HTML Table for States with the most lopsided margins
+	lopsided_margins = []
+	lopsided_margins_fields = ['State', 'Projected Margin', 'Projected Winner']
+	lopsided_margins.append(lopsided_margins_fields)
+	lopsided_margins_rows = []
+	for state in State.states:
+		row = []
+		if state.simulations['margin'] > 25:
+			row.append(state.name)
+			row.append(state.simulations['margin'])
+			row.append(state.simulations['winner'])
+			lopsided_margins_rows.append(row)
+	lopsided_margins_rows = sorted(lopsided_margins_rows, key=lambda row: row[1], reverse = True)
+	for row in lopsided_margins_rows:
+		row[1] = str(row[1]) + '%'
+	for i in range(len(lopsided_margins_rows)):
+		lopsided_margins.append(lopsided_margins_rows[i])
+
+	#Create HTML Table
+	cols = ["<td>{0}</td>".format( "</td><td>".join(t)) for t in lopsided_margins]
+	rows = "<tr>{0}</tr>".format( "</tr>\n<tr>".join(cols))
+	file = open("tables/lopsided_margins.html", 'r+')
+	file.truncate(0)
+	file.close()
+	file = open("tables/lopsided_margins.html", 'w')
+	file.write("""<HTML> <body>
+                    	<h2>Most Lopsided Projected Margins of Victory</h2>
                             <table>
                               {0}  
                             </table>
