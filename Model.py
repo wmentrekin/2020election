@@ -422,8 +422,9 @@ def visualize(margins):
 def write_results():
 
 	#Create CSV for States with closest projected margins
-	closest_margins_rows[0] = ['State', 'Projected Margin', 'Projected Winner']
+	closest_margins_fields = ['State', 'Projected Margin', 'Projected Winner']
 	closest_margins_rows = []
+	closest_margins_rows.append(closest_margins_fields)
 	for state in State.states:
 		row = []
 		if state.simulations['margin'] < 10:
