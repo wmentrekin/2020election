@@ -285,6 +285,7 @@ def aggregate():
 def simulate():
 
 	margins = {}
+	all_simulations = []
 
 	for state in State.states:
 
@@ -317,6 +318,7 @@ def simulate():
 		races_won_d = 0
 		races_won_r = 0
 		races = dist_d - dist_r
+		all_simulations.append((state, races))
 		for race in races:
 			if race > 0:
 				races_won_d += 1
@@ -344,6 +346,50 @@ def simulate():
 		state.simulations = simulations
 
 		margins[state.name] = (margin, winner)
+
+	#Finding Expected Electoral Vote Values for each Candidate
+
+	expected_ev_d = 0
+	expected_ev_r = 0
+
+	for state in State.states:
+		expected_ev_d += state.ev * state.simulations['win_pct_d'] / 100
+		expected_ev_r += state.ev * state.simulations['win_pct_r'] / 100
+
+	#Finding each candidate's chance to win the election
+
+	ev_counts = []
+
+	for i in range(10000):
+		ev = [0, 0]
+		ev_counts.append(ev)
+
+	for i in range(10000):
+		for race in all_simulations:
+			if race[1][i] > 0:
+				ev_counts[i][0] += race[0].ev 
+			else:
+				ev_counts[i][1] += race[0].ev
+
+	biden_wins = 0
+	trump_wins = 0
+
+	for race in ev_counts:
+		if race[0] > race[1]:
+			biden_wins += 1
+		else:
+			trump_wins += 1
+
+	#Writing Victory Chances and Expected Electoral Votes to CSV
+	win_prob = []
+	win_prob.append(['Expected Electoral Votes: Joe Biden', round(expected_ev_d)])
+	win_prob.append(['Expected Electoral Votes: Donald Trump', round(expected_ev_r)])
+	win_prob.append(['Chance of Victory: Joe Biden', str(round(100 * biden_wins / 10000, 2)) + '%'])
+	win_prob.append(['Chance of Victory: Donald Trump', str(round(100 * trump_wins / 10000, 2)) + '%'])
+
+	with open('results/win_prob.csv', 'w') as csv_file:
+		csv_writer = csv.writer(csv_file)
+		csv_writer.writerows(win_prob)
 
 	return margins
 
@@ -418,7 +464,7 @@ def visualize(margins):
 
 	plt.savefig('results/map.png')
 
-#Output CSV files with result data
+#Output HTML files with result data
 def write_results():
 
 	#Create HTML Table for States with closest projected margins
@@ -596,6 +642,27 @@ def write_results():
 	file = open("tables/results.html", 'w')
 	file.write("""<HTML> <body>
                     	<h2>Full Results</h2>
+                            <table class="center">
+                              {0}  
+                            </table>
+                        </body>  
+                  </HTML>""".format(rows))
+	file.close()
+
+	#Write HTML Table for Victory Chances and Expected Electoral Votes
+	with open('results/win_prob.csv', 'r') as csv_file:
+		csv_reader = csv.reader(csv_file)
+		win_prob = list(csv_reader)
+	
+	#Create HTML Table
+	cols = ["<td>{0}</td>".format( "</td><td>".join(t)) for t in win_prob]
+	rows = "<tr>{0}</tr>".format( "</tr>\n<tr>".join(cols))
+	file = open("tables/win_prob.html", 'r+')
+	file.truncate(0)
+	file.close()
+	file = open("tables/win_prob.html", 'w')
+	file.write("""<HTML> <body>
+                    	<h2>Win Probabilities & Expected Electoral Votes</h2>
                             <table class="center">
                               {0}  
                             </table>
