@@ -489,6 +489,43 @@ def write_results():
                   </HTML>""".format(rows))
 	file.close()
 
+	#Create HTML Table for tossup States
+	tossups = []
+	tossups_fields = ['State', 'Trump Projected Chance', 'Biden Projected Chance']
+	tossups.append(tossups_fields)
+	tossups_rows = []
+	for state in State.states:
+		row = []
+		chance_d = state.simulations['win_pct_d']
+		chance_r = state.simulations['win_pct_r']
+		if 40 < chance_d < 60 and 40 < chance_r < 60:
+			row.append(state.name)
+			row.append(chance_r)
+			row.append(chance_d)
+			tossups_rows.append(row)
+	tossups_rows = sorted(tossups_rows, key=lambda row: math.fabs(row[1] - row[2]))
+	for row in tossups_rows:
+		row[1] = str(row[1]) + '%'
+		row[2] = str(row[2]) + '%'
+	for i in range(len(tossups_rows)):
+		tossups.append(tossups_rows[i])
+	
+	#Create HTML Table
+	cols = ["<td>{0}</td>".format( "</td><td>".join(t)) for t in tossups]
+	rows = "<tr>{0}</tr>".format( "</tr>\n<tr>".join(cols))
+	file = open("tables/tossups.html", 'r+')
+	file.truncate(0)
+	file.close()
+	file = open("tables/tossups.html", 'w')
+	file.write("""<HTML> <body>
+                    	<h2>Projected Tossup States</h2>
+                            <table>
+                              {0}  
+                            </table>
+                        </body>  
+                  </HTML>""".format(rows))
+	file.close()
+
 #Run Model
 def model():
 
