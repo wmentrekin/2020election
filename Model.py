@@ -448,7 +448,7 @@ def write_results():
 	file = open("tables/closest_margins.html", 'w')
 	file.write("""<HTML> <body>
                     	<h2>Closest Projected Margins of Victory</h2>
-                            <table>
+                            <table class="center">
                               {0}  
                             </table>
                         </body>  
@@ -482,7 +482,7 @@ def write_results():
 	file = open("tables/lopsided_margins.html", 'w')
 	file.write("""<HTML> <body>
                     	<h2>Most Lopsided Projected Margins of Victory</h2>
-                            <table>
+                            <table class="center">
                               {0}  
                             </table>
                         </body>  
@@ -519,7 +519,7 @@ def write_results():
 	file = open("tables/tossups.html", 'w')
 	file.write("""<HTML> <body>
                     	<h2>Projected Tossup States</h2>
-                            <table>
+                            <table class="center">
                               {0}  
                             </table>
                         </body>  
@@ -562,8 +562,8 @@ def write_results():
 	file.close()
 	file = open("tables/flips.html", 'w')
 	file.write("""<HTML> <body>
-                    	<h2>Projected Tossup States</h2>
-                            <table>
+                    	<h2>Projected Flipped States</h2>
+                            <table class="center">
                               {0}  
                             </table>
                         </body>  
@@ -596,7 +596,7 @@ def write_results():
 	file = open("tables/results.html", 'w')
 	file.write("""<HTML> <body>
                     	<h2>Full Results</h2>
-                            <table>
+                            <table class="center">
                               {0}  
                             </table>
                         </body>  
