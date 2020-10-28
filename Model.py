@@ -526,6 +526,83 @@ def write_results():
                   </HTML>""".format(rows))
 	file.close()
 
+	#Create HTML Table for Projected Flips
+	flips = []
+	flips_fields = ['State', '2016 Winner', '2016 Margin', '2020 Projected Winner', '2020 Projected Margin']
+	flips.append(flips_fields)
+	flips_rows = []
+	for state in State.states:
+		winner_16 = 'Hillary Clinton' if state.election16['D'] > state.election16['R'] else 'Donald Trump'
+		winner_20 = state.simulations['winner']
+		if (winner_16 == 'Hillary Clinton' and winner_20 == 'Donald Trump') or (winner_16 == 'Donald Trump' and winner_20 == 'Joe Biden'):
+			row = []
+			d_16 = state.election16['D']
+			r_16 = state.election16['R']
+			total_16 = state.election16['Total']
+			margin_16 = round(math.fabs((100 * d_16 / total_16) - (100 * r_16 / total_16)), 2)
+			margin_20 = state.simulations['margin']
+			row.append(state.name)
+			row.append(winner_16)
+			row.append(margin_16)
+			row.append(winner_20)
+			row.append(margin_20)
+			flips_rows.append(row)
+	flips_rows = sorted(flips_rows, key=lambda row: row[2] + row[4], reverse = True)
+	for row in flips_rows:
+		row[2] = str(row[2]) + '%'
+		row[4] = str(row[4]) + '%'
+	for i in range(len(flips_rows)):
+		flips.append(flips_rows[i])
+
+	#Create HTML Table
+	cols = ["<td>{0}</td>".format( "</td><td>".join(t)) for t in flips]
+	rows = "<tr>{0}</tr>".format( "</tr>\n<tr>".join(cols))
+	file = open("tables/flips.html", 'r+')
+	file.truncate(0)
+	file.close()
+	file = open("tables/flips.html", 'w')
+	file.write("""<HTML> <body>
+                    	<h2>Projected Tossup States</h2>
+                            <table>
+                              {0}  
+                            </table>
+                        </body>  
+                  </HTML>""".format(rows))
+	file.close()
+
+	#Create HTML Table for Full Results
+	results = []
+	results_fields = ['State', 'Trump Projected Vote', 'Biden Projected Vote', 'Projected Margin', 'Trump Chance', 'Biden Chance']
+	results.append(results_fields)
+	results_rows = []
+	for state in State.states:
+		row = []
+		row.append(state.name)
+		row.append(str(state.simulations['vote_pct_r']) + '%')
+		row.append(str(state.simulations['vote_pct_d']) + '%')
+		row.append(str(state.simulations['margin']) + '%')
+		row.append(str(state.simulations['win_pct_r']) + '%')
+		row.append(str(state.simulations['win_pct_d']) + '%')
+		results_rows.append(row)
+	for row in results_rows:
+		results.append(row)
+	
+	#Create HTML Table
+	cols = ["<td>{0}</td>".format( "</td><td>".join(t)) for t in results]
+	rows = "<tr>{0}</tr>".format( "</tr>\n<tr>".join(cols))
+	file = open("tables/results.html", 'r+')
+	file.truncate(0)
+	file.close()
+	file = open("tables/results.html", 'w')
+	file.write("""<HTML> <body>
+                    	<h2>Full Results</h2>
+                            <table>
+                              {0}  
+                            </table>
+                        </body>  
+                  </HTML>""".format(rows))
+	file.close()
+
 #Run Model
 def model():
 
