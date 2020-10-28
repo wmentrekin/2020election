@@ -359,8 +359,8 @@ def visualize(margins):
 	m_ = Basemap(llcrnrlon = -190, llcrnrlat = 20, urcrnrlon = -143, urcrnrlat = 46, projection = 'merc', lat_ts = 20)
 
 	#Draw State Borders
-	shp_info = m.readshapefile('st99_d00', 'states', drawbounds = True, linewidth = 0.45, color = 'gray')
-	shp_info_ = m_.readshapefile('st99_d00','states', drawbounds = False)
+	shp_info = m.readshapefile('shapes/st99_d00', 'states', drawbounds = True, linewidth = 0.45, color = 'gray')
+	shp_info_ = m_.readshapefile('shapes/st99_d00','states', drawbounds = False)
 
 	#Assign States a color based on their margins
 	colors = {}
