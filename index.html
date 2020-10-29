@@ -73,8 +73,9 @@
     </p>
   </header>
 
+  <h1>Methods</h1>
+
   <section>
-    <h1>Methods</h1>
     <p>
       <b>Disclaimer</b>: This model is not an official prediction. I am in no way attesting to its potential accuracy or claiming it to be correct. 
       The point of this project was to be a learning exercise for me as well as an outlet for an interest of mine. The data you see here is purely a result 
@@ -103,33 +104,66 @@
 
   <h1>Results</h1>
 
-  <div class="container">
-    <h2>Average Margin of Victory</h2>
-    <img src="results/map.png" alt="Average Margin of Victory" width="800" height="536">
-  </div>
-
-  <div class="container">
-    <div class="row">
-      <div class="col">
-        <div w3-include-html="tables/closest_margins.html"></div>
-      </div>
-      <div class="col">
-        <div w3-include-html="tables/lopsided_margins.html"></div>
-      </div>
-      <div class="col">
-        <div w3-include-html="tables/tossups.html"></div>
-      </div>
-      <div class="col">
-        <div w3-include-html="tables/flips.html"></div>
-      </div>
-      <div class="col">
-        <div w3-include-html="tables/results.html"></div>
-      </div>
-      <div class="col">
-        <div w3-include-html="tables/win_prob.html"></div>
+  <section>
+    <div class="container">
+      <h2>Average Margin of Victory</h2>
+      <p>
+        In the model, there are 10,000 scenarios that were run. This map visualizes the average margin of victory of either candidate in each state on a color scale. 
+        States in blue are projected to be won by former Vice President Joe Biden, whereas states in red are projected to be won by incumbent President Donald Trump. 
+        The darker the color of the state, the larger the margin expected for the winning candidate.
+      </p>
+      <img src="results/map.png" alt="Average Margin of Victory" width="800" height="536">
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h2>Closest Projected Margins of Victory</h2>
+          <p>
+            The table below shows states where the winner is projected to win by less than 10% of the vote.
+          </p>
+          <div w3-include-html="tables/closest_margins.html"></div>
+        </div>
+        <div class="col">
+          <h2>Most Lopsided Projected Margins of Victory</h2>
+          <p>
+            The table below shows states where the winner is projected to win by more than 25% of the vote.
+          </p>
+          <div w3-include-html="tables/lopsided_margins.html"></div>
+        </div>
+        <div class="col">
+          <h2>Projected Tossup States</h2>
+          <p>
+            The table below shows states where both candidates have at least a 40% chance of winning.
+          </p>
+          <div w3-include-html="tables/tossups.html"></div>
+        </div>
+        <div class="col">
+          <h2>Projected Flipped States</h2>
+          <p>
+            This table below shows states where the projected winner in 2020 is from a different party than the one which won in 2016.
+          </p>
+          <div w3-include-html="tables/flips.html"></div>
+        </div>
+        <div class="col">
+          <h2>Full Results</h2>
+          <p>
+            The table below shows the full results of the model in all 50 states and the District of Columbia. 
+            Below you can see, for each state, the projected vote share for either candidate, the chance of victory, and the projected vote margin from the model.
+          </p>
+          <div w3-include-html="tables/results.html"></div>
+        </div>
+        <div class="col">
+          <h2>Win Probabilities & Expected Electoral Votes</h2>
+          <p>
+            The table below represents the expected value of electoral votes and chance of winning the electoral college for either candidate. 
+            The expected value of electoral votes was found by multiplying both candidates' probabilities of winning in every state by the electoral votes of every state. 
+            The chances of victory are simply a proportion of the scenarios in my model in which either candidate wins the electoral college.
+          </p>
+          <div w3-include-html="tables/win_prob.html"></div>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <h1>Insights</h1>
 

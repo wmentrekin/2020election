@@ -493,7 +493,6 @@ def write_results():
 	file.close()
 	file = open("tables/closest_margins.html", 'w')
 	file.write("""<HTML> <body>
-                    	<h2>Closest Projected Margins of Victory</h2>
                             <table class="center">
                               {0}  
                             </table>
@@ -527,7 +526,6 @@ def write_results():
 	file.close()
 	file = open("tables/lopsided_margins.html", 'w')
 	file.write("""<HTML> <body>
-                    	<h2>Most Lopsided Projected Margins of Victory</h2>
                             <table class="center">
                               {0}  
                             </table>
@@ -564,7 +562,6 @@ def write_results():
 	file.close()
 	file = open("tables/tossups.html", 'w')
 	file.write("""<HTML> <body>
-                    	<h2>Projected Tossup States</h2>
                             <table class="center">
                               {0}  
                             </table>
@@ -608,7 +605,6 @@ def write_results():
 	file.close()
 	file = open("tables/flips.html", 'w')
 	file.write("""<HTML> <body>
-                    	<h2>Projected Flipped States</h2>
                             <table class="center">
                               {0}  
                             </table>
@@ -641,7 +637,6 @@ def write_results():
 	file.close()
 	file = open("tables/results.html", 'w')
 	file.write("""<HTML> <body>
-                    	<h2>Full Results</h2>
                             <table class="center">
                               {0}  
                             </table>
@@ -662,7 +657,6 @@ def write_results():
 	file.close()
 	file = open("tables/win_prob.html", 'w')
 	file.write("""<HTML> <body>
-                    	<h2>Win Probabilities & Expected Electoral Votes</h2>
                             <table class="center">
                               {0}  
                             </table>
