@@ -614,12 +614,13 @@ def write_results():
 
 	#Create HTML Table for Full Results
 	results = []
-	results_fields = ['State', 'Trump Projected Vote', 'Biden Projected Vote', 'Projected Margin', 'Trump Chance', 'Biden Chance']
+	results_fields = ['State', 'Projected Winner', 'Trump Projected Vote', 'Biden Projected Vote', 'Projected Margin', 'Trump Chance', 'Biden Chance']
 	results.append(results_fields)
 	results_rows = []
 	for state in State.states:
 		row = []
 		row.append(state.name)
+		row.append(state.simulations['winner'])
 		row.append(str(state.simulations['vote_pct_r']) + '%')
 		row.append(str(state.simulations['vote_pct_d']) + '%')
 		row.append(str(state.simulations['margin']) + '%')
